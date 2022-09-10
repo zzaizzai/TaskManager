@@ -26,18 +26,20 @@ struct AddNewTask: View {
                         Image(systemName: "arrow.left")
                             .font(.title3)
                             .foregroundColor(.black)
-                            
+                        
                     }
-
+                    
                     
                 }
             
+            
+            //colors
             VStack(alignment: .leading) {
                 Text("Task Color")
                     .foregroundColor(.gray)
                     .font(.caption)
                 
-                let colors: [String] = ["Yellow", "Green", "Blue" , "Purple", "Red" , "Orange"]
+                let colors: [String] = ["Red" , "Orange" ,"Yellow", "Green", "Blue" , "Purple"]
                 
                 HStack(spacing: 15) {
                     ForEach(colors, id: \.self) { color in
@@ -77,12 +79,12 @@ struct AddNewTask: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .overlay(alignment: .bottomTrailing) {
                 Button {
-                    
+                    taskModel.showDatePicker.toggle()
                 } label: {
                     Image(systemName: "calendar")
                         .foregroundColor(.black)
                 }
-
+                
                 
             }
             
@@ -138,6 +140,9 @@ struct AddNewTask: View {
             Divider()
             
             Button {
+                if taskModel.addTask(context: env.managedObjectContext){
+                    env.dismiss()
+                }
                 
             } label: {
                 Text("Save Task")
@@ -145,12 +150,41 @@ struct AddNewTask: View {
                     .fontWeight(.semibold)
                     .frame(maxWidth: .infinity)
                     .padding()
+                    .foregroundColor(.white)
+                    .background {
+                        Capsule()
+                            .fill(.black)
+                    }
             }
-
+            .frame(maxHeight: .infinity , alignment: .bottom)
+            .padding(.bottom, 10)
+            .disabled(taskModel.taskTitle == "")
+            .opacity(taskModel.taskTitle == "" ? 0.6 : 1)
+            
             
         }
         .frame(maxHeight: .infinity, alignment: .top)
         .padding()
+        .overlay {
+            ZStack{
+                if taskModel.showDatePicker {
+                    Rectangle()
+                        .fill(.ultraThinMaterial)
+                        .ignoresSafeArea()
+                        .onTapGesture {
+                            taskModel.showDatePicker = false
+                        }
+                    
+                    DatePicker.init("", selection: $taskModel.taskDeadline, in: Date.now...Date.distantFuture )
+                        .datePickerStyle(.graphical)
+                        .labelsHidden()
+                        .padding()
+                        .background(.white, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                        .padding()
+                }
+            }
+            .animation(.easeInOut, value: taskModel.showDatePicker)
+        }
     }
 }
 
